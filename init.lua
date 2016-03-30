@@ -101,33 +101,116 @@ end
 -- this hidden node is placed on top of the bottom, and prevents
 -- nodes from being placed in the top half of the door.
 minetest.register_node("doors:hidden", {
-	description = "Hidden Door Segment",
-	-- can't use airlike otherwise falling nodes will turn to entities
-	-- and will be forever stuck until door is removed.
+	tiles = {
+		"default_clay.png"
+	},
 	drawtype = "nodebox",
 	paramtype = "light",
 	paramtype2 = "facedir",
-	sunlight_propagates = true,
-	-- has to be walkable for falling nodes to stop falling.
-	walkable = true,
 	pointable = false,
 	diggable = false,
 	buildable_to = false,
 	floodable = false,
 	drop = "",
-	groups = {not_in_creative_inventory = 1},
-	tiles = {"doors_blank.png"},
-	-- 1px transparent block inside door hinge near node top.
-	nodebox = {
+	groups = {cracky=3, not_in_creative_inventory = 1 },
+
+	node_box = {
 		type = "fixed",
-		fixed = {-15/32, 13/32, -15/32, -13/32, 1/2, -13/32},
+		fixed = {
+			{-0.5, -1.5, -0.5, -0.49, 0.5, -0.25},
+			{-0.5625, -1.5, -0.5625, -0.49, 0.5, -0.5},
+			
+			{0.49, -1.5, -0.5, 0.5, 0.5, -0.25},
+			{0.49, -1.5, -0.5625, 0.5625, 0.5, -0.5},
+			
+			{-0.5, 0.49, -0.5, 0.5, 0.5, -0.25},
+			{-0.5625, 0.49, -0.5625, 0.5625, 0.5625, -0.5},
+		}
 	},
-	-- collision_box needed otherise selection box would be full node size
 	collision_box = {
 		type = "fixed",
-		fixed = {-15/32, 13/32, -15/32, -13/32, 1/2, -13/32},
+		fixed = {
+			{-0.5, -1.5, -0.5, -0.49, 0.5, -0.25},
+			{-0.5, -1.5, -0.5, -0.49, 0.5, -0.5},
+			
+			{0.49, -1.5, -0.5, 0.5, 0.5, -0.25},
+			{0.49, -1.5, -0.5, 0.5, 0.5, -0.5},
+			
+			{-0.5, 0.49, -0.5, 0.5, 0.5, -0.25},
+			{-0.5, 0.49, -0.5, 0.5, 0.5, -0.5},
+		}
 	},
-	on_blast = function() end,
+	on_blast = function() end
+})
+minetest.register_node("doors:hidden2", {
+	tiles = {
+		"default_clay.png"
+	},
+	drawtype = "nodebox",
+	paramtype = "light",
+	paramtype2 = "facedir",
+	pointable = false,
+	diggable = false,
+	buildable_to = false,
+	floodable = false,
+	drop = "",
+	groups = { not_in_creative_inventory = 1 },
+	node_box = {
+		type = "fixed",
+		fixed = {
+			{-0.5, -1.5, -0.5, -0.49, 0.5, -0.25},
+			{-0.5625, -1.5, -0.5625, -0.49, 0.49, -0.5},
+			
+			{-0.5, 0.49, -0.5, 0.5, 0.5, -0.25},
+			{-0.5625, 0.49, -0.5625, 0.5625, 0.5625, -0.5},
+		}
+	},
+	collision_box = {
+		type = "fixed",
+		fixed = {
+			{-0.5, -1.5, -0.5, -0.49, 0.5, -0.25},
+			{-0.5, -1.5, -0.5, -0.49, 0.49, -0.5},
+			
+			{-0.5, 0.49, -0.5, 0.5, 0.5, -0.25},
+			{-0.5, 0.49, -0.5, 0.5, 0.5, -0.5},
+		}
+	},
+	on_blast = function() end
+})
+minetest.register_node("doors:hidden3", {
+	tiles = {
+		"default_clay.png"
+	},
+	drawtype = "nodebox",
+	paramtype = "light",
+	paramtype2 = "facedir",
+	pointable = false,
+	diggable = false,
+	buildable_to = false,
+	floodable = false,
+	drop = "",
+	groups = { not_in_creative_inventory = 1 },
+	node_box = {
+		type = "fixed",
+		fixed = {
+			{0.49, -1.5, -0.5, 0.5, 0.5, -0.25},
+			{0.49, -1.5, -0.5625, 0.5625, 0.49, -0.5},
+			
+			{-0.5, 0.49, -0.5, 0.5, 0.5, -0.25},
+			{-0.5625, 0.49, -0.5625, 0.5625, 0.5625, -0.5},
+		}
+	},
+	collision_box = {
+		type = "fixed",
+		fixed = {
+			{0.49, -1.5, -0.5, 0.5, 0.5, -0.25},
+			{0.49, -1.5, -0.5, 0.5, 0.49, -0.5},
+			
+			{-0.5, 0.49, -0.5, 0.5, 0.5, -0.25},
+			{-0.5, 0.49, -0.5, 0.5, 0.5, -0.5},
+		}
+	},
+	on_blast = function() end
 })
 
 -- table used to aid door opening/closing
@@ -360,16 +443,19 @@ function doors.register(name, def)
 			}
 
 			local state = 0
+			local f_count = minetest.get_objects_inside_radius(pos, 2)
+			local frame1 = minetest.find_node_near(pos, 1, "doors:hidden")
 
 			if minetest.get_item_group(minetest.get_node(aside).name, "door") == 1 then
-
 				state = state + 2
-
 				minetest.set_node(pos, {name = name .. "_b", param2 = dir})
-				minetest.set_node(above, {name = "doors:hidden", param2 = (dir + 3) % 4})
+				if frame1 ~= nil then
+				minetest.set_node(above, { name = "doors:hidden3", param2 = dir })
+				minetest.set_node(frame1, { name = "doors:hidden2", param2 = dir })
+				end
 			else
 				minetest.set_node(pos, {name = name .. "_a", param2 = dir})
-				minetest.set_node(above, {name = "doors:hidden", param2 = dir})
+				minetest.set_node(above, { name = "doors:hidden", param2 = dir })
 			end
 
 			local meta = minetest.get_meta(pos)
@@ -466,7 +552,25 @@ function doors.register(name, def)
 	end
 
 	def.on_destruct = function(pos)
+		--local frame1 = minetest.find_node_near(pos, 1, "doors:hidden")
+		local frame2 = minetest.find_node_near(pos, 1, "doors:hidden2")
+		local frame3 = minetest.find_node_near(pos, 1, "doors:hidden3")
+		--local dir = minetest.get_node(frame2).param2
+		print(frame1)
+		print(frame2)
+		print(frame3)
+		if frame2 == nil and
+			frame3 == nil then
 		minetest.remove_node({x = pos.x, y = pos.y + 1, z = pos.z})
+		end
+		if frame2 ~= nil then
+			local dir = minetest.get_node(frame2).param2
+			minetest.set_node(frame2, { name = "doors:hidden", param2 = dir })
+		end
+		if frame3 ~= nil then
+			local dir = minetest.get_node(frame3).param2
+			minetest.set_node(frame3, { name = "doors:hidden", param2 = dir })
+		end
 	end
 
 	minetest.register_node(":" .. name .. "_a", {
